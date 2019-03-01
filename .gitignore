@@ -3,3 +3,5 @@
 out
 gen
 node_modules/
+.cache/
+dist/
