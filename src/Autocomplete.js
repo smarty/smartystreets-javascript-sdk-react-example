@@ -1,6 +1,7 @@
 import React from "react";
 import * as SmartyStreetsSDK from "smartystreets-javascript-sdk";
 import InputForm from "./InputForm";
+import Suggestions from "./Suggestions";
 
 export default class Autocomplete extends React.Component {
 	constructor(props) {
@@ -13,6 +14,7 @@ export default class Autocomplete extends React.Component {
 			province: "",
 			postalCode: "",
 			country: "",
+			suggestions: [],
 		};
 
 		const SmartyStreetsCore = SmartyStreetsSDK.core;
@@ -25,6 +27,7 @@ export default class Autocomplete extends React.Component {
 
 		this.updateField = this.updateField.bind(this);
 		this.queryAutocompleteForSuggestions = this.queryAutocompleteForSuggestions.bind(this);
+		this.selectSuggestion = this.selectSuggestion.bind(this);
 	}
 
 	updateField(e) {
@@ -38,14 +41,36 @@ export default class Autocomplete extends React.Component {
 		const lookup = new this.Lookup(query);
 
 		this.client.send(lookup)
-			.then(console.log)
+			.then(response => {
+				this.setState({suggestions: response.result});
+			})
 			.catch(console.warn);
 	}
 
+	selectSuggestion(suggestion) {
+		this.setState({
+			address1: suggestion.streetLine,
+			locality: suggestion.city,
+			province: suggestion.state,
+		});
+	}
+
 	render() {
-		return <InputForm
-			updateField={this.updateField}
-			queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
-		/>;
+		return <div className={"autocomplete"}>
+			<InputForm
+				updateField={this.updateField}
+				queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
+				address1={this.state.address1}
+				address2={this.state.address2}
+				locality={this.state.locality}
+				province={this.state.province}
+				postalCode={this.state.postalCode}
+				country={this.state.country}
+			/>
+			<Suggestions
+				suggestions={this.state.suggestions}
+				selectSuggestion={this.selectSuggestion}
+			/>
+		</div>;
 	}
 }
