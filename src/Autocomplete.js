@@ -52,6 +52,7 @@ export default class Autocomplete extends React.Component {
 			address1: suggestion.streetLine,
 			locality: suggestion.city,
 			province: suggestion.state,
+			suggestions: [],
 		});
 	}
 
