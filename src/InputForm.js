@@ -14,7 +14,7 @@ export default function InputForm({address1, address2, locality, province, posta
 				<input
 					className={"autocomplete--input-field"}
 					type="text"
-					name={"address1"}
+					id={"address1"}
 					value={address1}
 					onChange={e => {
 						updateField(e);
@@ -32,7 +32,7 @@ export default function InputForm({address1, address2, locality, province, posta
 				<input
 					className={"autocomplete--input-field"}
 					type="text"
-					name={"address2"}
+					id={"address2"}
 					value={address2}
 					onChange={updateField}
 				/>
@@ -47,7 +47,7 @@ export default function InputForm({address1, address2, locality, province, posta
 				<input
 					className={"autocomplete--input-field"}
 					type="text"
-					name={"locality"}
+					id={"locality"}
 					value={locality}
 					onChange={updateField}
 				/>
@@ -62,7 +62,7 @@ export default function InputForm({address1, address2, locality, province, posta
 				<input
 					className={"autocomplete--input-field"}
 					type="text"
-					name={"province"}
+					id={"province"}
 					value={province}
 					onChange={updateField}
 				/>
@@ -77,7 +77,7 @@ export default function InputForm({address1, address2, locality, province, posta
 				<input
 					className={"autocomplete--input-field"}
 					type="text"
-					name={"postalCode"}
+					id={"postalCode"}
 					value={postalCode}
 					onChange={updateField}
 				/>
@@ -92,7 +92,7 @@ export default function InputForm({address1, address2, locality, province, posta
 				<input
 					className={"autocomplete--input-field"}
 					type="text"
-					name={"country"}
+					id={"country"}
 					value={country}
 					onChange={updateField}
 				/>
