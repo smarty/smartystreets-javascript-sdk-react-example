@@ -3,9 +3,24 @@ import "./InputForm.scss";
 import inputFields from "../data/input_fields";
 import {countries} from "../data/countries";
 
-export default function InputForm({state, updateField, queryAutocompleteForSuggestions}) {
+export default function InputForm({state, updateField, updateCheckbox, queryAutocompleteForSuggestions}) {
 	return (
 		<form className={"autocomplete--input-form"}>
+			<div className="autocomplete--input-group">
+				<label
+					htmlFor="shouldValidate"
+					className={"autocomplete--input-label"}
+				>
+					Validate on Selection
+				</label>
+				<input
+					className={"autocomplete--input-field"}
+					id={"shouldValidate"}
+					type="checkbox"
+					checked={state.shouldValidate}
+					onChange={updateCheckbox}
+				/>
+			</div>
 			{inputFields.map(inputField => {
 				return (
 					<div className={"autocomplete--input-group"} key={inputField.fieldName}>

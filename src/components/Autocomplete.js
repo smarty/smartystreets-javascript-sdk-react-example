@@ -8,6 +8,7 @@ export default class Autocomplete extends React.Component {
 		super(props);
 
 		this.state = {
+			shouldValidate: true,
 			address1: "",
 			address2: "",
 			locality: "",
@@ -26,15 +27,24 @@ export default class Autocomplete extends React.Component {
 		this.client = clientBuilder.buildUsAutocompleteClient();
 
 		this.updateField = this.updateField.bind(this);
+		this.updateCheckbox = this.updateCheckbox.bind(this);
 		this.queryAutocompleteForSuggestions = this.queryAutocompleteForSuggestions.bind(this);
 		this.selectSuggestion = this.selectSuggestion.bind(this);
 	}
 
-	updateField(e) {
+	updateStateFromForm(key, value) {
 		const newState = {};
-		newState[e.target.id] = e.target.value;
+		newState[key] = value;
 
 		this.setState(newState);
+	}
+
+	updateField(e) {
+		this.updateStateFromForm(e.target.id, e.target.value);
+	}
+
+	updateCheckbox(e) {
+		this.updateStateFromForm(e.target.id, e.target.checked);
 	}
 
 	queryAutocompleteForSuggestions(query) {
@@ -60,6 +70,7 @@ export default class Autocomplete extends React.Component {
 		return <div className={"autocomplete"}>
 			<InputForm
 				updateField={this.updateField}
+				updateCheckbox={this.updateCheckbox}
 				queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
 				state={this.state}
 			/>
