@@ -13,12 +13,12 @@ export default class Autocomplete extends React.Component {
 			locality: "",
 			province: "",
 			postalCode: "",
-			country: "",
+			country: "US",
 			suggestions: [],
 		};
 
 		const SmartyStreetsCore = SmartyStreetsSDK.core;
-		const websiteKey = ""; // Your website key here
+		const websiteKey = "10831590130710894"; // Your website key here
 		const smartyStreetsSharedCredentials = new SmartyStreetsCore.SharedCredentials(websiteKey);
 		const clientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
 
@@ -32,7 +32,7 @@ export default class Autocomplete extends React.Component {
 
 	updateField(e) {
 		const newState = {};
-		newState[e.target.name] = e.target.value;
+		newState[e.target.id] = e.target.value;
 
 		this.setState(newState);
 	}
@@ -61,12 +61,7 @@ export default class Autocomplete extends React.Component {
 			<InputForm
 				updateField={this.updateField}
 				queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
-				address1={this.state.address1}
-				address2={this.state.address2}
-				locality={this.state.locality}
-				province={this.state.province}
-				postalCode={this.state.postalCode}
-				country={this.state.country}
+				state={this.state}
 			/>
 			<Suggestions
 				suggestions={this.state.suggestions}

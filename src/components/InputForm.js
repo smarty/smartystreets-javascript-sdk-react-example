@@ -1,5 +1,7 @@
 import React from "react";
 import "./InputForm.scss";
+import inputFields from "../data/input_fields";
+import {countries} from "../data/countries";
 
 export default function InputForm({address1, address2, locality, province, postalCode, country, updateField, queryAutocompleteForSuggestions}) {
 	return (
@@ -89,13 +91,16 @@ export default function InputForm({address1, address2, locality, province, posta
 				>
 					Country
 				</label>
-				<input
-					className={"autocomplete--input-field"}
-					type="text"
-					id={"country"}
-					value={country}
+				<select
+					value={state.country}
 					onChange={updateField}
-				/>
+					id={"country"}
+					className={"autocomplete--input-field"}
+				>
+					{countries.map(country => {
+						return <option value={country.iso2} key={country.iso2}>{country.name}</option>;
+					})}
+				</select>
 			</div>
 		</form>
 	);
