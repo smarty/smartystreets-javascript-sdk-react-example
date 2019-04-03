@@ -1,5 +1,6 @@
 import React from "react";
 import * as SmartyStreetsSDK from "smartystreets-javascript-sdk";
+import * as sdkUtils from "smartystreets-javascript-sdk-utils";
 import InputForm from "./InputForm";
 import Suggestions from "./Suggestions";
 
@@ -16,6 +17,7 @@ export default class Autocomplete extends React.Component {
 			postalCode: "",
 			country: "US",
 			suggestions: [],
+			error: "",
 		};
 
 		const SmartyStreetsCore = SmartyStreetsSDK.core;
@@ -92,15 +94,32 @@ export default class Autocomplete extends React.Component {
 	}
 
 	updateStateFromValidatedUsAddress(response) {
-		const candidate = response.lookups[0].result[0];
-		console.log(candidate);
-		this.setState({
-			address1: candidate.deliveryLine1,
-			address2: candidate.deliveryLine2,
-			city: candidate.components.cityName,
-			state: candidate.components.state,
-			postalCode: `${candidate.components.zipCode}-${candidate.components.plus4Code}`,
-		});
+		const lookup = response.lookups[0];
+		const isValid = sdkUtils.isValid(lookup);
+		const isAmbiguous = sdkUtils.isAmbiguous(lookup);
+		const isMissingSecondary = sdkUtils.isMissingSecondary(lookup);
+		const newState = {
+			error: "",
+		};
+
+		if (!isValid) {
+			newState.error = "The address is invalid.";
+		} else if (isAmbiguous) {
+			newState.error = "The address is ambiguous.";
+		} else if (isMissingSecondary) {
+			newState.error = "The address is missing a secondary number.";
+		} else if (isValid) {
+			const candidate = lookup.result[0];
+
+			newState.address1 = candidate.deliveryLine1;
+			newState.address2 = candidate.deliveryLine2;
+			newState.city = candidate.components.cityName;
+			newState.state = candidate.components.state;
+			newState.postalCode = `${candidate.components.zipCode}-${candidate.components.plus4Code}`;
+			newState.error = "";
+		}
+
+		this.setState(newState);
 	}
 
 	render() {
@@ -115,6 +134,7 @@ export default class Autocomplete extends React.Component {
 				suggestions={this.state.suggestions}
 				selectSuggestion={this.selectSuggestion}
 			/>
+			<div><h3>Validation Errors: </h3>{this.state.error}</div>
 		</div>;
 	}
 }
