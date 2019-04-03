@@ -23,12 +23,10 @@ export default class Autocomplete extends React.Component {
 		const smartyStreetsSharedCredentials = new SmartyStreetsCore.SharedCredentials(websiteKey);
 		const autoCompleteClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
 		const usStreetClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
-		const internationalStreetClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
 
 		this.SmartyStreetsCore = SmartyStreetsCore;
 		this.autoCompleteClient = autoCompleteClientBuilder.buildUsAutocompleteClient();
 		this.usStreetClient = usStreetClientBuilder.buildUsStreetApiClient();
-		this.internationalStreetClient = internationalStreetClientBuilder.buildInternationalStreetClient();
 
 		this.updateField = this.updateField.bind(this);
 		this.updateCheckbox = this.updateCheckbox.bind(this);
