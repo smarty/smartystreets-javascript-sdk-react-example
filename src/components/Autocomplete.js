@@ -65,7 +65,7 @@ export default class Autocomplete extends React.Component {
 	selectSuggestion(suggestion) {
 		this.useAutoCompleteSuggestion(suggestion)
 			.then(() => {
-				if (this.state.shouldValidate) this.validateAddress();
+				if (this.state.shouldValidate) this.validateUsAddress();
 			});
 	}
 
@@ -78,11 +78,6 @@ export default class Autocomplete extends React.Component {
 				suggestions: [],
 			}, resolve);
 		});
-	}
-
-	validateAddress() {
-		if (this.state.country === "US") this.validateUsAddress();
-		else this.validateInternationalAddress();
 	}
 
 	validateUsAddress() {
@@ -108,20 +103,6 @@ export default class Autocomplete extends React.Component {
 			state: candidate.components.state,
 			postalCode: `${candidate.components.zipCode}-${candidate.components.plus4Code}`,
 		});
-	}
-
-	validateInternationalAddress() {
-		let lookup = new SmartyStreetsSDK.internationalStreet.Lookup();
-		lookup.address1 = this.state.address1;
-		lookup.address2 = this.state.address2;
-		lookup.locality = this.state.locality;
-		lookup.province = this.state.province;
-		lookup.postalCode = this.state.postalCode;
-		lookup.country = this.state.country;
-
-		this.internationalStreetClient.send(lookup)
-			.then(console.log)
-			.catch(console.warn);
 	}
 
 	render() {
