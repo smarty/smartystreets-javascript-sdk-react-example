@@ -3,7 +3,7 @@ import "./InputForm.scss";
 import inputFields from "../data/input_fields";
 import {countries} from "../data/countries";
 
-export default function InputForm({state, updateField, updateCheckbox, queryAutocompleteForSuggestions}) {
+export default function InputForm({state, updateField, updateCheckbox, queryAutocompleteForSuggestions, validateCallback}) {
 	return (
 		<form className={"autocomplete--input-form"}>
 			<div className="autocomplete--input-group">
@@ -61,6 +61,10 @@ export default function InputForm({state, updateField, updateCheckbox, queryAuto
 					})}
 				</select>
 			</div>
+			<button onClick={e => {
+				e.preventDefault();
+				validateCallback();
+			}}>Validate</button>
 		</form>
 	);
 }

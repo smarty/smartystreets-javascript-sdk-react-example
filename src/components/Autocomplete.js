@@ -35,6 +35,7 @@ export default class Autocomplete extends React.Component {
 		this.queryAutocompleteForSuggestions = this.queryAutocompleteForSuggestions.bind(this);
 		this.selectSuggestion = this.selectSuggestion.bind(this);
 		this.updateStateFromValidatedUsAddress = this.updateStateFromValidatedUsAddress.bind(this);
+		this.validateUsAddress = this.validateUsAddress.bind(this);
 	}
 
 	updateStateFromForm(key, value) {
@@ -88,9 +89,13 @@ export default class Autocomplete extends React.Component {
 		lookup.state = this.state.province;
 		lookup.zipCode = this.state.postalCode;
 
-		this.usStreetClient.send(lookup)
-			.then(this.updateStateFromValidatedUsAddress)
-			.catch(console.warn);
+		if (!!lookup.street) {
+			this.usStreetClient.send(lookup)
+				.then(this.updateStateFromValidatedUsAddress)
+				.catch(e => this.setState({error: e.error}));
+		} else {
+			this.setState({error: "A street address is required."});
+		}
 	}
 
 	updateStateFromValidatedUsAddress(response) {
@@ -130,6 +135,7 @@ export default class Autocomplete extends React.Component {
 					updateCheckbox={this.updateCheckbox}
 					queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
 					state={this.state}
+					validateCallback={this.validateUsAddress}
 				/>
 				<Suggestions
 					suggestions={this.state.suggestions}
