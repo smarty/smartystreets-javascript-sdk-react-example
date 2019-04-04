@@ -123,18 +123,25 @@ export default class Autocomplete extends React.Component {
 	}
 
 	render() {
-		return <div className={"autocomplete"}>
-			<InputForm
-				updateField={this.updateField}
-				updateCheckbox={this.updateCheckbox}
-				queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
-				state={this.state}
-			/>
-			<Suggestions
-				suggestions={this.state.suggestions}
-				selectSuggestion={this.selectSuggestion}
-			/>
-			<div><h3>Validation Errors: </h3>{this.state.error}</div>
+		return <div>
+			<div>
+				<InputForm
+					updateField={this.updateField}
+					updateCheckbox={this.updateCheckbox}
+					queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
+					state={this.state}
+				/>
+				<Suggestions
+					suggestions={this.state.suggestions}
+					selectSuggestion={this.selectSuggestion}
+				/>
+			</div>
+			{this.state.error &&
+				<div>
+					<h3>Validation Error:</h3>
+					{this.state.error}
+				</div>
+			}
 		</div>;
 	}
 }

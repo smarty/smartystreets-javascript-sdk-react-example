@@ -1,12 +1,12 @@
-.autocomplete--input-group {
-	display: flex;
-	flex-wrap: wrap;
-}
-
 .autocomplete--input-label {
-	flex: 1;
+	display: inline-block;
+	font-family: Helvetica, Arial, sans-serif;
+	padding-right: 15px;
+	text-align: right;
+	width: 200px;
 }
 
 .autocomplete--input-field {
-	flex: 2;
+	display: inline-block;
+	width: calc(100% - 230px);
 }

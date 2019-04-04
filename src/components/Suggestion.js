@@ -19,7 +19,8 @@ export default class Suggestion extends Component {
 	}
 
 	buildResultHoverClass() {
-		return this.state.isHovered ? "autocomplete--suggestion-hover" : "";
+		const className = "autocomplete--suggestion";
+		return this.state.isHovered ? className + " autocomplete--suggestion-hover" : className;
 	}
 
 	render() {

@@ -1,4 +1,10 @@
+.autocomplete--suggestion {
+	font-family: Helvetica, Arial, sans-serif;
+	padding: 5px 10px;
+}
+
 .autocomplete--suggestion-hover {
-	background-color: #ff0300;
-	color: #fefefe;
+	background-color: #D9ECF0;
+	color: #02355A;
+	cursor: pointer;
 }
