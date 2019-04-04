@@ -11,4 +11,4 @@ To spin this example up and see it in action:
    - With NPM: `npm install`
    - With Yarn `yarn install` 
 5. Open `src/components/Autocomplete.js` in the cloned repository, adding [the website key you created earlier](https://account.smartystreets.com/#keys) to line `24`.
-6. From the cloned repository folder on your terminal, run `npm run start`
+6. From the cloned repository folder on your terminal, run `npm run start`. This will open your browser and load the implementation demo.
