@@ -37,7 +37,10 @@ export default function InputForm({state, updateField, updateCheckbox, queryAuto
 							value={state[inputField.fieldName]}
 							onChange={e => {
 								updateField(e);
-								queryAutocompleteForSuggestions(e.target.value);
+
+								if (inputField.fieldName === "address1") {
+									queryAutocompleteForSuggestions(e.target.value);
+								}
 							}}
 						/>
 					</div>

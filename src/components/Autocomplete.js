@@ -12,9 +12,9 @@ export default class Autocomplete extends React.Component {
 			shouldValidate: true,
 			address1: "",
 			address2: "",
-			locality: "",
-			province: "",
-			postalCode: "",
+			city: "",
+			state: "",
+			zipCode: "",
 			country: "US",
 			suggestions: [],
 			error: "",
@@ -74,8 +74,8 @@ export default class Autocomplete extends React.Component {
 		return new Promise(resolve => {
 			this.setState({
 				address1: suggestion.streetLine,
-				locality: suggestion.city,
-				province: suggestion.state,
+				city: suggestion.city,
+				state: suggestion.state,
 				suggestions: [],
 			}, resolve);
 		});
@@ -85,9 +85,9 @@ export default class Autocomplete extends React.Component {
 		let lookup = new SmartyStreetsSDK.usStreet.Lookup();
 		lookup.street = this.state.address1;
 		lookup.street2 = this.state.address2;
-		lookup.city = this.state.locality;
-		lookup.state = this.state.province;
-		lookup.zipCode = this.state.postalCode;
+		lookup.city = this.state.city;
+		lookup.state = this.state.state;
+		lookup.zipCode = this.state.zipCode;
 
 		if (!!lookup.street) {
 			this.usStreetClient.send(lookup)
@@ -117,10 +117,10 @@ export default class Autocomplete extends React.Component {
 			const candidate = lookup.result[0];
 
 			newState.address1 = candidate.deliveryLine1;
-			newState.address2 = candidate.deliveryLine2;
+			newState.address2 = candidate.deliveryLine2 || "";
 			newState.city = candidate.components.cityName;
 			newState.state = candidate.components.state;
-			newState.postalCode = `${candidate.components.zipCode}-${candidate.components.plus4Code}`;
+			newState.zipCode = `${candidate.components.zipCode}-${candidate.components.plus4Code}`;
 			newState.error = "";
 		}
 
