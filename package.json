@@ -11,6 +11,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.10.5",
+    "fsevents": "^2.1.3",
     "parcel-bundler": "^1.12.4",
     "sass": "^1.26.10"
   },
