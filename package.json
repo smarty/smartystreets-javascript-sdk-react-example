@@ -12,13 +12,13 @@
   "license": "ISC",
   "devDependencies": {
     "parcel-bundler": "^1.12.4",
-    "sass": "^1.17.2"
+    "sass": "^1.26.10"
   },
   "dependencies": {
     "prop-types": "^15.7.2",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
     "smartystreets-javascript-sdk": "^1.2.1",
-    "smartystreets-javascript-sdk-utils": "^1.1.0"
+    "smartystreets-javascript-sdk-utils": "^1.1.7"
   }
 }
