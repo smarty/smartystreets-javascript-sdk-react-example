@@ -18,9 +18,9 @@
   },
   "dependencies": {
     "prop-types": "^15.7.2",
-    "react": "^16.8.3",
-    "react-dom": "^16.8.3",
-    "smartystreets-javascript-sdk": "^1.2.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "smartystreets-javascript-sdk": "^1.4.5",
     "smartystreets-javascript-sdk-utils": "^1.1.7"
   }
 }
