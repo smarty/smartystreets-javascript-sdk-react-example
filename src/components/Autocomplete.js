@@ -16,18 +16,18 @@ export default class Autocomplete extends React.Component {
 			state: "",
 			zipCode: "",
 			country: "US",
-			suggestions: [],
+			suggestions: {result: []},
 			error: "",
 		};
 
 		const SmartyStreetsCore = SmartyStreetsSDK.core;
-		const websiteKey = ""; // Your website key here
+		const websiteKey = "109841334282097086"; // Your website key here
 		const smartyStreetsSharedCredentials = new SmartyStreetsCore.SharedCredentials(websiteKey);
-		const autoCompleteClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
+		const autoCompleteClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials).withLicenses(["us-autocomplete-pro-cloud"]);
 		const usStreetClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
 
 		this.SmartyStreetsCore = SmartyStreetsCore;
-		this.autoCompleteClient = autoCompleteClientBuilder.buildUsAutocompleteClient();
+		this.autoCompleteClient = autoCompleteClientBuilder.buildUsAutocompleteProClient();
 		this.usStreetClient = usStreetClientBuilder.buildUsStreetApiClient();
 
 		this.updateField = this.updateField.bind(this);
@@ -54,11 +54,11 @@ export default class Autocomplete extends React.Component {
 	}
 
 	queryAutocompleteForSuggestions(query) {
-		const lookup = new SmartyStreetsSDK.usAutocomplete.Lookup(query);
+		const lookup = new SmartyStreetsSDK.usAutocompletePro.Lookup(query);
 
 		this.autoCompleteClient.send(lookup)
-			.then(response => {
-				this.setState({suggestions: response.result});
+			.then(results => {
+				this.setState({suggestions: results});
 			})
 			.catch(console.warn);
 	}
@@ -73,7 +73,7 @@ export default class Autocomplete extends React.Component {
 	useAutoCompleteSuggestion(suggestion) {
 		return new Promise(resolve => {
 			this.setState({
-				address1: suggestion.streetLine,
+				address1: suggestion.street_line,
 				city: suggestion.city,
 				state: suggestion.state,
 				suggestions: [],

@@ -10,8 +10,19 @@ export default class Suggestion extends Component {
 			isHovered: false,
 		};
 
+		this.formatAutocompleteSuggestion = this.formatAutocompleteSuggestion.bind(this);
 		this.setIsHovered = this.setIsHovered.bind(this);
 		this.buildResultHoverClass = this.buildResultHoverClass.bind(this);
+	}
+
+	formatAutocompleteSuggestion(suggestion) {
+		const street = suggestion.streetLine ? `${suggestion.streetLine} ` : "";
+		const secondary = suggestion?.secondary ? `${suggestion.secondary} ` : "";
+		const city = suggestion?.city ? `${suggestion.city} ` : "";
+		const state = suggestion?.state ? `${suggestion.state}, ` : "";
+		const zip = suggestion?.zipcode ? `${suggestion.zipcode}` : "";
+
+		return street + secondary + city + state + zip;
 	}
 
 	setIsHovered(isHovered) {
@@ -30,8 +41,8 @@ export default class Suggestion extends Component {
 				onClick={this.props.selectSuggestion}
 				onMouseEnter={() => this.setIsHovered(true)}
 				onMouseLeave={() => this.setIsHovered(false)}
-			>
-				{this.props.suggestion.text}
+				>
+				{this.formatAutocompleteSuggestion(this.props.suggestion)}
 			</div>
 		);
 	}
