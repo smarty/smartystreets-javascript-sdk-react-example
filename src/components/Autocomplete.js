@@ -36,6 +36,7 @@ export default class Autocomplete extends React.Component {
 		this.selectSuggestion = this.selectSuggestion.bind(this);
 		this.updateStateFromValidatedUsAddress = this.updateStateFromValidatedUsAddress.bind(this);
 		this.validateUsAddress = this.validateUsAddress.bind(this);
+		this.formatAutocompleteSuggestion = this.formatAutocompleteSuggestion.bind(this);
 	}
 
 	updateStateFromForm(key, value) {
@@ -53,9 +54,24 @@ export default class Autocomplete extends React.Component {
 		this.updateStateFromForm(e.target.id, e.target.checked);
 	}
 
-	queryAutocompleteForSuggestions(query) {
-		const lookup = new SmartyStreetsSDK.usAutocompletePro.Lookup(query);
+	formatAutocompleteSuggestion(suggestion) {
+		const street = suggestion.streetLine ? `${suggestion.streetLine} ` : "";
+		const secondary = suggestion?.secondary ? `${suggestion.secondary} ` : "";
+		const entries = suggestion?.entries !== 0 ? `(${suggestion.entries}) ` : "";
+		const city = suggestion?.city ? `${suggestion.city} ` : "";
+		const state = suggestion?.state ? `${suggestion.state}, ` : "";
+		const zip = suggestion?.zipcode ? `${suggestion.zipcode}` : "";
 
+		return street + secondary + entries + city + state + zip;
+	}
+
+	queryAutocompleteForSuggestions(query, hasSecondaries=false) {
+		const lookup = new SmartyStreetsSDK.usAutocompletePro.Lookup(query);
+		
+		if (hasSecondaries) {
+			lookup.selected = query;
+		}
+		console.log(lookup);
 		this.autoCompleteClient.send(lookup)
 			.then(results => {
 				this.setState({suggestions: results});
@@ -63,20 +79,27 @@ export default class Autocomplete extends React.Component {
 			.catch(console.warn);
 	}
 
-	selectSuggestion(suggestion) {
-		this.useAutoCompleteSuggestion(suggestion)
-			.then(() => {
-				if (this.state.shouldValidate) this.validateUsAddress();
-			});
+	selectSuggestion(suggestion) {		
+		if (suggestion.entries > 1) {
+			this.queryAutocompleteForSuggestions(this.formatAutocompleteSuggestion(suggestion), true);
+		} else {
+			this.useAutoCompleteSuggestion(suggestion)
+				.then(() => {
+					if (this.state.shouldValidate) this.validateUsAddress();
+				});
+		}
 	}
 
 	useAutoCompleteSuggestion(suggestion) {
+		console.log("suggestion: ", suggestion);
 		return new Promise(resolve => {
 			this.setState({
-				address1: suggestion.street_line,
+				address1: suggestion.streetLine,
+				address2: suggestion.secondary,
 				city: suggestion.city,
 				state: suggestion.state,
-				suggestions: [],
+				zipCode: suggestion.zipcode,
+				suggestions: {result: []},
 			}, resolve);
 		});
 	}
@@ -91,14 +114,14 @@ export default class Autocomplete extends React.Component {
 
 		if (!!lookup.street) {
 			this.usStreetClient.send(lookup)
-				.then(this.updateStateFromValidatedUsAddress)
+				.then((response) => this.updateStateFromValidatedUsAddress(response, true))
 				.catch(e => this.setState({error: e.error}));
 		} else {
 			this.setState({error: "A street address is required."});
 		}
 	}
 
-	updateStateFromValidatedUsAddress(response) {
+	updateStateFromValidatedUsAddress(response, isAutocomplete = false) {
 		const lookup = response.lookups[0];
 		const isValid = sdkUtils.isValid(lookup);
 		const isAmbiguous = sdkUtils.isAmbiguous(lookup);
@@ -111,7 +134,7 @@ export default class Autocomplete extends React.Component {
 			newState.error = "The address is invalid.";
 		} else if (isAmbiguous) {
 			newState.error = "The address is ambiguous.";
-		} else if (isMissingSecondary) {
+		} else if (isMissingSecondary && !isAutocomplete) {
 			newState.error = "The address is missing a secondary number.";
 		} else if (isValid) {
 			const candidate = lookup.result[0];
