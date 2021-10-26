@@ -21,7 +21,7 @@ export default class Autocomplete extends React.Component {
 		};
 
 		const SmartyStreetsCore = SmartyStreetsSDK.core;
-		const websiteKey = "109841334282097086"; // Your website key here
+		const websiteKey = ""; // Your website key here
 		const smartyStreetsSharedCredentials = new SmartyStreetsCore.SharedCredentials(websiteKey);
 		const autoCompleteClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials).withLicenses(["us-autocomplete-pro-cloud"]);
 		const usStreetClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
