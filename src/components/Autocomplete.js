@@ -1,5 +1,5 @@
 import React from "react";
-import * as SmartyStreetsSDK from "smartystreets-javascript-sdk";
+import * as SmartySDK from "smartystreets-javascript-sdk";
 import * as sdkUtils from "smartystreets-javascript-sdk-utils";
 import InputForm from "./InputForm";
 import Suggestions from "./Suggestions";
@@ -20,13 +20,13 @@ export default class Autocomplete extends React.Component {
 			error: "",
 		};
 
-		const SmartyStreetsCore = SmartyStreetsSDK.core;
+		const SmartyCore = SmartySDK.core;
 		const websiteKey = ""; // Your website key here
-		const smartyStreetsSharedCredentials = new SmartyStreetsCore.SharedCredentials(websiteKey);
-		const autoCompleteClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials).withLicenses(["us-autocomplete-pro-cloud"]);
-		const usStreetClientBuilder = new SmartyStreetsCore.ClientBuilder(smartyStreetsSharedCredentials);
+		const smartySharedCredentials = new SmartyCore.SharedCredentials(websiteKey);
+		const autoCompleteClientBuilder = new SmartyCore.ClientBuilder(smartySharedCredentials).withLicenses(["us-autocomplete-pro-cloud"]);
+		const usStreetClientBuilder = new SmartyCore.ClientBuilder(smartySharedCredentials);
 
-		this.SmartyStreetsCore = SmartyStreetsCore;
+		this.SmartyCore = SmartyCore;
 		this.autoCompleteClient = autoCompleteClientBuilder.buildUsAutocompleteProClient();
 		this.usStreetClient = usStreetClientBuilder.buildUsStreetApiClient();
 
@@ -66,7 +66,7 @@ export default class Autocomplete extends React.Component {
 	}
 
 	queryAutocompleteForSuggestions(query, hasSecondaries=false) {
-		const lookup = new SmartyStreetsSDK.usAutocompletePro.Lookup(query);
+		const lookup = new SmartySDK.usAutocompletePro.Lookup(query);
 		
 		if (hasSecondaries) {
 			lookup.selected = query;
@@ -105,7 +105,7 @@ export default class Autocomplete extends React.Component {
 	}
 
 	validateUsAddress() {
-		let lookup = new SmartyStreetsSDK.usStreet.Lookup();
+		let lookup = new SmartySDK.usStreet.Lookup();
 		lookup.street = this.state.address1;
 		lookup.street2 = this.state.address2;
 		lookup.city = this.state.city;
