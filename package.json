@@ -11,18 +11,19 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.10.5",
+    "@babel/core": "^7.18.6",
     "@parcel/transformer-sass": "^2.8.3",
+    "buffer": "^6.0.3",
     "fsevents": "^2.1.3",
     "process": "^0.11.10",
-    "sass": "^1.26.10"
+    "sass": "^1.69.5"
   },
   "dependencies": {
     "parcel": "^2.8.3",
-    "prop-types": "^15.7.2",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "smartystreets-javascript-sdk": "^1.13.2",
-    "smartystreets-javascript-sdk-utils": "^1.2.5"
+    "prop-types": "^15.8.1",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "smartystreets-javascript-sdk": "^4.0.2",
+    "smartystreets-javascript-sdk-utils": "^1.2.7"
   }
 }

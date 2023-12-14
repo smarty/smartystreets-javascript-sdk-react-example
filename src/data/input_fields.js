@@ -9,15 +9,15 @@ const inputFields = [
 	},
 	{
 		fieldName: "city",
-		fieldLabel: "City",
+		fieldLabel: "City/Locality",
 	},
 	{
 		fieldName: "state",
-		fieldLabel: "State",
+		fieldLabel: "State/Administrative Area",
 	},
 	{
 		fieldName: "zipCode",
-		fieldLabel: "Zip Code",
+		fieldLabel: "Zip/Postal Code",
 	},
 ];
 

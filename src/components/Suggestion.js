@@ -16,6 +16,7 @@ export default class Suggestion extends Component {
 	}
 
 	formatAutocompleteSuggestion(suggestion) {
+		const addressText = suggestion?.addressText ? `${suggestion.addressText} ` : "";
 		const street = suggestion.streetLine ? `${suggestion.streetLine} ` : "";
 		const secondary = suggestion?.secondary ? `${suggestion.secondary} ` : "";
 		const entries = suggestion?.entries > 1 ? `(${suggestion.entries} more entries) ` : "";
@@ -23,7 +24,7 @@ export default class Suggestion extends Component {
 		const state = suggestion?.state ? `${suggestion.state}, ` : "";
 		const zip = suggestion?.zipcode ? `${suggestion.zipcode}` : "";
 
-		return street + secondary + entries + city + state + zip;
+		return addressText + street + secondary + entries + city + state + zip;
 	}
 
 	setIsHovered(isHovered) {
