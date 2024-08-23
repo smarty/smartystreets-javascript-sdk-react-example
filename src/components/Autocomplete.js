@@ -205,7 +205,7 @@ export default class Autocomplete extends React.Component {
 					updateCheckbox={this.updateCheckbox}
 					queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
 					state={this.state}
-					validateCallback={this.validateUsAddress}
+					validateCallback={this.validateAddress}
 				/>
 				<Suggestions
 					suggestions={this.state.suggestions}
