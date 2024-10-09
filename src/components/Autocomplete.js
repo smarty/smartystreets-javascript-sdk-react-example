@@ -21,7 +21,7 @@ const Autocomplete = () => {
 	});
 
 	const SmartyCore = SmartySDK.core;
-	const websiteKey = "173801724660243622"; // Your website key here
+	const websiteKey = ""; // Your website key here
 	const smartySharedCredentials = new SmartyCore.SharedCredentials(websiteKey);
 
 	const autoCompleteClient = new SmartyCore.ClientBuilder(smartySharedCredentials).withLicenses(["us-autocomplete-pro-cloud"]).buildUsAutocompleteProClient();
