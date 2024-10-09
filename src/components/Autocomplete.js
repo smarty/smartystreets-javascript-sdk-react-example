@@ -1,63 +1,51 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import * as SmartySDK from "smartystreets-javascript-sdk";
 import * as sdkUtils from "smartystreets-javascript-sdk-utils";
 import InputForm from "./InputForm";
 import Suggestions from "./Suggestions";
 
-export default class Autocomplete extends React.Component {
-	constructor(props) {
-		super(props);
+const Autocomplete = () => {
+	const [state, setState] = useState({
+		lookup: new SmartySDK.usAutocompletePro.Lookup(),
+		client: null,
+		shouldValidate: true,
+		freeform: "",
+		address1: "",
+		address2: "",
+		city: "",
+		state: "",
+		zipCode: "",
+		country: "US",
+		suggestions: {result: []},
+		error: "",
+	});
 
-		this.state = {
-			lookup: new SmartySDK.usAutocompletePro.Lookup,
-			client: this.autoCompleteClient,
-			shouldValidate: true,
-			freeform: "",
-			address1: "",
-			address2: "",
-			city: "",
-			state: "",
-			zipCode: "",
-			country: "US",
-			suggestions: {result: []},
-			error: "",
-		};
+	const SmartyCore = SmartySDK.core;
+	const websiteKey = "173801724660243622"; // Your website key here
+	const smartySharedCredentials = new SmartyCore.SharedCredentials(websiteKey);
 
-		const SmartyCore = SmartySDK.core;
-		const websiteKey = ""; // Your website key here
-		const smartySharedCredentials = new SmartyCore.SharedCredentials(websiteKey);
+	const autoCompleteClient = new SmartyCore.ClientBuilder(smartySharedCredentials).withLicenses(["us-autocomplete-pro-cloud"]).buildUsAutocompleteProClient();
+	const internationalautocompleteClient = new SmartyCore.ClientBuilder(smartySharedCredentials).withLicenses(["international-autocomplete-v2-cloud"]).buildInternationalAddressAutocompleteClient();
+	const usStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildUsStreetApiClient();
+	const internationalStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildInternationalStreetClient();
 
-		this.SmartyCore = SmartyCore;
-		this.autoCompleteClient = new SmartyCore.ClientBuilder(smartySharedCredentials).withLicenses(["us-autocomplete-pro-cloud"]).buildUsAutocompleteProClient();
-		this.internationalautocompleteClient = new SmartyCore.ClientBuilder(smartySharedCredentials).withLicenses(["international-autocomplete-v2-cloud"]).buildInternationalAddressAutocompleteClient();
-		this.usStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildUsStreetApiClient();
-		this.internationalStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildInternationalStreetClient();
+	useEffect(() => {
+		setState(prevState => ({...prevState, client: autoCompleteClient}));
+	}, []);
 
-		this.updateField = this.updateField.bind(this);
-		this.updateCheckbox = this.updateCheckbox.bind(this);
-		this.queryAutocompleteForSuggestions = this.queryAutocompleteForSuggestions.bind(this);
-		this.selectSuggestion = this.selectSuggestion.bind(this);
-		this.updateStateFromValidatedUsAddress = this.updateStateFromValidatedUsAddress.bind(this);
-		this.validateAddress = this.validateAddress.bind(this);
-		this.formatAutocompleteSuggestion = this.formatAutocompleteSuggestion.bind(this);
-	}
+	const updateStateFromForm = useCallback((key, value) => {
+		setState(prevState => ({...prevState, [key]: value}));
+	}, []);
 
-	updateStateFromForm(key, value) {
-		const newState = {};
-		newState[key] = value;
+	const updateField = useCallback((e) => {
+		updateStateFromForm(e.target.id, e.target.value);
+	}, [updateStateFromForm]);
 
-		this.setState(newState);
-	}
+	const updateCheckbox = useCallback((e) => {
+		updateStateFromForm(e.target.id, e.target.checked);
+	}, [updateStateFromForm]);
 
-	updateField(e) {
-		this.updateStateFromForm(e.target.id, e.target.value);
-	}
-
-	updateCheckbox(e) {
-		this.updateStateFromForm(e.target.id, e.target.checked);
-	}
-
-	formatAutocompleteSuggestion(suggestion) {
+	const formatAutocompleteSuggestion = useCallback((suggestion) => {
 		const addressText = suggestion.addressText ? `${suggestion.addressText} ` : "";
 		const street = suggestion.streetLine ? `${suggestion.streetLine} ` : "";
 		const secondary = suggestion?.secondary ? `${suggestion.secondary} ` : "";
@@ -67,93 +55,98 @@ export default class Autocomplete extends React.Component {
 		const zip = suggestion?.zipcode ? `${suggestion.zipcode}` : "";
 
 		return addressText + street + secondary + entries + city + state + zip;
-	}
+	}, []);
 
-	queryAutocompleteForSuggestions(query, addressId, hasSecondaries=false) {
-		if (this.state.country === "US") {
-			this.lookup = new SmartySDK.usAutocompletePro.Lookup(query);
-			this.client = this.autoCompleteClient;
+	const queryAutocompleteForSuggestions = useCallback((query, addressId, hasSecondaries=false) => {
+		let lookup;
+		let client;
+
+		if (state.country === "US") {
+			lookup = new SmartySDK.usAutocompletePro.Lookup(query);
+			client = autoCompleteClient;
 			if (hasSecondaries) {
-				this.lookup.selected = query;
+				lookup.selected = query;
 			}
 		} else {
-			this.client = this.internationalautocompleteClient;
+			client = internationalautocompleteClient;
 			if (hasSecondaries) {
-				this.lookup = new SmartySDK.internationalAddressAutocomplete.Lookup({addressId: addressId});
+				lookup = new SmartySDK.internationalAddressAutocomplete.Lookup({addressId: addressId});
 			} else {
-				this.lookup = new SmartySDK.internationalAddressAutocomplete.Lookup(query);
-				this.lookup.search = query;
+				lookup = new SmartySDK.internationalAddressAutocomplete.Lookup(query);
+				lookup.search = query;
 			}
 		}
-		this.lookup.country = this.state.country;
+		lookup.country = state.country;
 
-		this.client.send(this.lookup)
+		client.send(lookup)
 			.then(results => {
-				this.setState({suggestions: results});
+				setState(prevState => ({...prevState, suggestions: results}));
 			})
 			.catch(console.warn);
-	}
+	}, [state.country]);
 
-	selectSuggestion(suggestion) {
-		if (suggestion.entries > 1) {
-			this.queryAutocompleteForSuggestions(this.formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
-		} else {
-			this.useAutoCompleteSuggestion(suggestion)
-				.then(() => {
-					if (this.state.shouldValidate) this.validateAddress();
-				});
-		}
-	}
-
-	useAutoCompleteSuggestion(suggestion) {
-		if (this.state.country === "US") {
+	const useAutoCompleteSuggestion = useCallback((suggestion) => {
+		if (state.country === "US") {
 			return new Promise(resolve => {
-				this.setState({
+				setState(prevState => ({
+					...prevState,
 					address1: suggestion.streetLine,
 					address2: suggestion.secondary,
 					city: suggestion.city,
 					state: suggestion.state,
 					zipCode: suggestion.zipcode,
 					suggestions: {result: []},
-				}, resolve);
+				}), resolve);
 			});
 		} else {
 			return new Promise(resolve => {
-				this.setState({
+				setState(prevState => ({
+					...prevState,
 					freeform: suggestion.addressText,
-				}, resolve);
+				}), resolve);
 			})
 		}
-	}
+	}, [state.country]);
 
-	validateAddress() {
-		if (this.state.country === "US") {
+	const selectSuggestion = useCallback((suggestion) => {
+		if (suggestion.entries > 1) {
+			queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
+		} else {
+			useAutoCompleteSuggestion(suggestion)
+				.then(() => {
+					if (state.shouldValidate) validateAddress();
+				});
+		}
+	}, [state.shouldValidate, formatAutocompleteSuggestion, queryAutocompleteForSuggestions, useAutoCompleteSuggestion]);
+
+	const validateAddress = useCallback(() => {
+		if (state.country === "US") {
 			let lookup = new SmartySDK.usStreet.Lookup();
-			lookup.street = this.state.address1;
-			lookup.street2 = this.state.address2;
-			lookup.city = this.state.city;
-			lookup.state = this.state.state;
-			lookup.zipCode = this.state.zipCode;
+			lookup.street = state.address1;
+			lookup.street2 = state.address2;
+			lookup.city = state.city;
+			lookup.state = state.state;
+			lookup.zipCode = state.zipCode;
 
 			if (!!lookup.street) {
-				this.usStreetClient.send(lookup)
-					.then((response) => this.updateStateFromValidatedUsAddress(response, true))
-					.catch(e => this.setState({error: e.error}));
+				usStreetClient.send(lookup)
+					.then((response) => updateStateFromValidatedUsAddress(response, true))
+					.catch(e => setState(prevState => ({...prevState, error: e.error})));
 			} else {
-				this.setState({error: "A street address is required."});
+				setState(prevState => ({...prevState, error: "A street address is required."}));
 			}
 		} else {
 			let lookup = new SmartySDK.internationalStreet.Lookup();
-			lookup.freeform = this.state.freeform;
-			lookup.country = this.state.country;
+			lookup.freeform = state.freeform;
+			lookup.country = state.country;
 
-			this.internationalStreetClient.send(lookup)
-				.then((response) => this.updateStateFromValidatedInternationalAddress(response, true))
-				.catch(e => this.setState({error: e.error}));
+			internationalStreetClient.send(lookup)
+				.then((response) => updateStateFromValidatedInternationalAddress(response, true))
+				.catch(e => setState(prevState => ({...prevState, error: e.error})));
 		}
-	}
+	}, [state]);
 
-	updateStateFromValidatedUsAddress(response, isAutocomplete = false) {
+	const updateStateFromValidatedUsAddress = useCallback((response, isAutocomplete = false) => {
 		const lookup = response.lookups[0];
 		const isValid = sdkUtils.isValid(lookup);
 		const isAmbiguous = sdkUtils.isAmbiguous(lookup);
@@ -179,45 +172,46 @@ export default class Autocomplete extends React.Component {
 			newState.error = "";
 		}
 
-		this.setState(newState);
-	}
+		setState(prevState => ({...prevState, ...newState}));
+	}, []);
 
-	updateStateFromValidatedInternationalAddress(response, isAutocomplete = false) {
+	const updateStateFromValidatedInternationalAddress = useCallback((response, isAutocomplete = false) => {
 		const result = response.result[0];
 		const newState = {
 			error: "",
+			address1: result.address1,
+			address2: result.address2,
+			city: result.components.locality,
+			state: result.components.administrativeArea,
+			zipCode: result.components.postalCode,
 		};
 
-		newState.address1 = result.address1;
-		newState.address2 = result.address2;
-		newState.city = result.components.locality;
-		newState.state = result.components.administrativeArea;
-		newState.zipCode = result.components.postalCode;
+		setState(prevState => ({...prevState, ...newState}));
+	}, []);
 
-		this.setState(newState);
-	}
-
-	render() {
-		return <div>
+	return (
+		<div>
 			<div>
 				<InputForm
-					updateField={this.updateField}
-					updateCheckbox={this.updateCheckbox}
-					queryAutocompleteForSuggestions={this.queryAutocompleteForSuggestions}
-					state={this.state}
-					validateCallback={this.validateAddress}
+					updateField={updateField}
+					updateCheckbox={updateCheckbox}
+					queryAutocompleteForSuggestions={queryAutocompleteForSuggestions}
+					state={state}
+					validateCallback={validateAddress}
 				/>
 				<Suggestions
-					suggestions={this.state.suggestions}
-					selectSuggestion={this.selectSuggestion}
+					suggestions={state.suggestions}
+					selectSuggestion={selectSuggestion}
 				/>
 			</div>
-			{this.state.error &&
+			{state.error &&
 				<div>
 					<h3>Validation Error:</h3>
-					{this.state.error}
+					{state.error}
 				</div>
 			}
-		</div>;
-	}
-}
+		</div>
+	);
+};
+
+export default Autocomplete;

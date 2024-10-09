@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function TextInputField({inputField, state, queryAutocompleteForSuggestions, updateField}) {
+const TextInputField = ({inputField, state, queryAutocompleteForSuggestions, updateField}) => {
 	return (
 		<div className={"autocomplete--input-group"} key={inputField.fieldName}>
 			<label
@@ -21,4 +21,6 @@ export default function TextInputField({inputField, state, queryAutocompleteForS
 			/>
 		</div>
 	);
-}
+};
+
+export default TextInputField;
