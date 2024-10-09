@@ -57,30 +57,35 @@ const Autocomplete = () => {
 		return addressText + street + secondary + entries + city + state + zip;
 	};
 
-	const queryAutocompleteForSuggestions = (query, addressId, hasSecondaries=false) => {
-		let lookup;
-		let client;
-
-		if (state.country === "US") {
-			lookup = new SmartySDK.usAutocompletePro.Lookup(query);
-			client = autoCompleteClient;
-			if (hasSecondaries) {
-				lookup.selected = query;
-			}
-		} else {
-			client = internationalautocompleteClient;
-			if (hasSecondaries) {
-				lookup = new SmartySDK.internationalAddressAutocomplete.Lookup({addressId: addressId});
-			} else {
-				lookup = new SmartySDK.internationalAddressAutocomplete.Lookup(query);
-				lookup.search = query;
-			}
+	const createUSLookup = (query, hasSecondaries) => {
+		const lookup = new SmartySDK.usAutocompletePro.Lookup(query);
+		if (hasSecondaries) {
+			lookup.selected = query;
 		}
+		return lookup;
+	};
+	
+	const createInternationalLookup = (query, addressId, hasSecondaries) => {
+		const lookup = new SmartySDK.internationalAddressAutocomplete.Lookup(hasSecondaries ? { addressId } : query);
+		if (!hasSecondaries) {
+			lookup.search = query;
+		}
+		return lookup;
+	};
+	
+	const queryAutocompleteForSuggestions = (query, addressId, hasSecondaries = false) => {
+		const isUS = state.country === "US";
+		
+		const client = isUS ? autoCompleteClient : internationalautocompleteClient;
+		const lookup = isUS
+			? createUSLookup(query, hasSecondaries)
+			: createInternationalLookup(query, addressId, hasSecondaries);
+	
 		lookup.country = state.country;
-
+	
 		client.send(lookup)
 			.then(results => {
-				setState(prevState => ({...prevState, suggestions: results}));
+				setState(prevState => ({ ...prevState, suggestions: results }));
 			})
 			.catch(console.warn);
 	};
