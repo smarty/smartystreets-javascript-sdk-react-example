@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import * as SmartySDK from "smartystreets-javascript-sdk";
 import * as sdkUtils from "smartystreets-javascript-sdk-utils";
 import InputForm from "./InputForm";
@@ -33,19 +33,20 @@ const Autocomplete = () => {
 		setState(prevState => ({...prevState, client: autoCompleteClient}));
 	}, []);
 
-	const updateStateFromForm = useCallback((key, value) => {
+	const updateStateFromForm = (key, value) => {
+		console.log(key, value);
 		setState(prevState => ({...prevState, [key]: value}));
-	}, []);
+	};
 
-	const updateField = useCallback((e) => {
+	const updateField = (e) => {
 		updateStateFromForm(e.target.id, e.target.value);
-	}, [updateStateFromForm]);
+	};
 
-	const updateCheckbox = useCallback((e) => {
+	const updateCheckbox = (e) => {
 		updateStateFromForm(e.target.id, e.target.checked);
-	}, [updateStateFromForm]);
+	};
 
-	const formatAutocompleteSuggestion = useCallback((suggestion) => {
+	const formatAutocompleteSuggestion = (suggestion) => {
 		const addressText = suggestion.addressText ? `${suggestion.addressText} ` : "";
 		const street = suggestion.streetLine ? `${suggestion.streetLine} ` : "";
 		const secondary = suggestion?.secondary ? `${suggestion.secondary} ` : "";
@@ -55,9 +56,9 @@ const Autocomplete = () => {
 		const zip = suggestion?.zipcode ? `${suggestion.zipcode}` : "";
 
 		return addressText + street + secondary + entries + city + state + zip;
-	}, []);
+	};
 
-	const queryAutocompleteForSuggestions = useCallback((query, addressId, hasSecondaries=false) => {
+	const queryAutocompleteForSuggestions = (query, addressId, hasSecondaries=false) => {
 		let lookup;
 		let client;
 
@@ -83,9 +84,9 @@ const Autocomplete = () => {
 				setState(prevState => ({...prevState, suggestions: results}));
 			})
 			.catch(console.warn);
-	}, [state.country]);
+	};
 
-	const useAutoCompleteSuggestion = useCallback((suggestion) => {
+	const useAutoCompleteSuggestion = (suggestion) => {
 		if (state.country === "US") {
 			return new Promise(resolve => {
 				setState(prevState => ({
@@ -106,9 +107,11 @@ const Autocomplete = () => {
 				}), resolve);
 			})
 		}
-	}, [state.country]);
+	};
 
-	const selectSuggestion = useCallback((suggestion) => {
+	console.log("state now", state);
+
+	const selectSuggestion = (suggestion) => {
 		if (suggestion.entries > 1) {
 			queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
 		} else {
@@ -117,9 +120,9 @@ const Autocomplete = () => {
 					if (state.shouldValidate) validateAddress();
 				});
 		}
-	}, [state.shouldValidate, formatAutocompleteSuggestion, queryAutocompleteForSuggestions, useAutoCompleteSuggestion]);
+	};
 
-	const validateAddress = useCallback(() => {
+	const validateAddress = () => {
 		if (state.country === "US") {
 			let lookup = new SmartySDK.usStreet.Lookup();
 			lookup.street = state.address1;
@@ -144,9 +147,9 @@ const Autocomplete = () => {
 				.then((response) => updateStateFromValidatedInternationalAddress(response, true))
 				.catch(e => setState(prevState => ({...prevState, error: e.error})));
 		}
-	}, [state]);
+	};
 
-	const updateStateFromValidatedUsAddress = useCallback((response, isAutocomplete = false) => {
+	const updateStateFromValidatedUsAddress = (response, isAutocomplete = false) => {
 		const lookup = response.lookups[0];
 		const isValid = sdkUtils.isValid(lookup);
 		const isAmbiguous = sdkUtils.isAmbiguous(lookup);
@@ -173,9 +176,9 @@ const Autocomplete = () => {
 		}
 
 		setState(prevState => ({...prevState, ...newState}));
-	}, []);
+	};
 
-	const updateStateFromValidatedInternationalAddress = useCallback((response, isAutocomplete = false) => {
+	const updateStateFromValidatedInternationalAddress = (response, isAutocomplete = false) => {
 		const result = response.result[0];
 		const newState = {
 			error: "",
@@ -187,7 +190,7 @@ const Autocomplete = () => {
 		};
 
 		setState(prevState => ({...prevState, ...newState}));
-	}, []);
+	};
 
 	return (
 		<div>
