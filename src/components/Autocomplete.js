@@ -34,7 +34,6 @@ const Autocomplete = () => {
 	}, []);
 
 	const updateStateFromForm = (key, value) => {
-		console.log(key, value);
 		setState(prevState => ({...prevState, [key]: value}));
 	};
 
@@ -109,8 +108,6 @@ const Autocomplete = () => {
 		}
 	};
 
-	console.log("state now", state);
-
 	const selectSuggestion = (suggestion) => {
 		if (suggestion.entries > 1) {
 			queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
@@ -124,7 +121,7 @@ const Autocomplete = () => {
 
 	const validateAddress = () => {
 		if (state.country === "US") {
-			let lookup = new SmartySDK.usStreet.Lookup();
+			const lookup = new SmartySDK.usStreet.Lookup();
 			lookup.street = state.address1;
 			lookup.street2 = state.address2;
 			lookup.city = state.city;
@@ -139,7 +136,7 @@ const Autocomplete = () => {
 				setState(prevState => ({...prevState, error: "A street address is required."}));
 			}
 		} else {
-			let lookup = new SmartySDK.internationalStreet.Lookup();
+			const lookup = new SmartySDK.internationalStreet.Lookup();
 			lookup.freeform = state.freeform;
 			lookup.country = state.country;
 
