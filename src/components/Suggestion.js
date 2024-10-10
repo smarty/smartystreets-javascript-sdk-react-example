@@ -1,21 +1,11 @@
-import React, {Component} from "react";
-import * as PropTypes from "prop-types";
+import React, { useState } from "react";
+import PropTypes from "prop-types";
 import "./Suggestion.scss";
 
-export default class Suggestion extends Component {
-	constructor(props) {
-		super(props);
+const Suggestion = ({ suggestion, selectSuggestion }) => {
+	const [isHovered, setIsHovered] = useState(false);
 
-		this.state = {
-			isHovered: false,
-		};
-
-		this.formatAutocompleteSuggestion = this.formatAutocompleteSuggestion.bind(this);
-		this.setIsHovered = this.setIsHovered.bind(this);
-		this.buildResultHoverClass = this.buildResultHoverClass.bind(this);
-	}
-
-	formatAutocompleteSuggestion(suggestion) {
+	const formatAutocompleteSuggestion = (suggestion) => {
 		const addressText = suggestion?.addressText ? `${suggestion.addressText} ` : "";
 		const street = suggestion.streetLine ? `${suggestion.streetLine} ` : "";
 		const secondary = suggestion?.secondary ? `${suggestion.secondary} ` : "";
@@ -25,32 +15,28 @@ export default class Suggestion extends Component {
 		const zip = suggestion?.zipcode ? `${suggestion.zipcode}` : "";
 
 		return addressText + street + secondary + entries + city + state + zip;
-	}
+	};
 
-	setIsHovered(isHovered) {
-		this.setState({isHovered});
-	}
-
-	buildResultHoverClass() {
+	const buildResultHoverClass = () => {
 		const className = "autocomplete--suggestion";
-		return this.state.isHovered ? className + " autocomplete--suggestion-hover" : className;
-	}
+		return isHovered ? className + " autocomplete--suggestion-hover" : className;
+	};
 
-	render() {
-		return (
-			<div
-				className={this.buildResultHoverClass()}
-				onClick={this.props.selectSuggestion}
-				onMouseEnter={() => this.setIsHovered(true)}
-				onMouseLeave={() => this.setIsHovered(false)}
-				>
-				{this.formatAutocompleteSuggestion(this.props.suggestion)}
-			</div>
-		);
-	}
-}
+	return (
+		<div
+			className={buildResultHoverClass()}
+			onClick={selectSuggestion}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
+			{formatAutocompleteSuggestion(suggestion)}
+		</div>
+	);
+};
 
 Suggestion.propTypes = {
 	suggestion: PropTypes.any,
 	selectSuggestion: PropTypes.func.isRequired,
 };
+
+export default Suggestion;
