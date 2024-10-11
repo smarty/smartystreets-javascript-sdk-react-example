@@ -5,20 +5,18 @@ import InputForm from "./InputForm";
 import Suggestions from "./Suggestions";
 
 const Autocomplete = () => {
-	const [state, setState] = useState({
-		lookup: new SmartySDK.usAutocompletePro.Lookup(),
-		client: null,
-		shouldValidate: true,
-		freeform: "",
+	const [formValues, setFormValues] = useState({
 		address1: "",
 		address2: "",
 		city: "",
 		state: "",
 		zipCode: "",
 		country: "US",
-		suggestions: {result: []},
-		error: "",
 	});
+	const [freeform, setFreeform] = useState("");
+	const [suggestions, setSuggestions] = useState({result: []});
+	const [shouldValidate, setShouldValidate] = useState(true);
+	const [error, setError] = useState("");
 
 	const SmartyCore = SmartySDK.core;
 	const websiteKey = ""; // Your website key here
@@ -28,21 +26,11 @@ const Autocomplete = () => {
 	const internationalautocompleteClient = new SmartyCore.ClientBuilder(smartySharedCredentials).withLicenses(["international-autocomplete-v2-cloud"]).buildInternationalAddressAutocompleteClient();
 	const usStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildUsStreetApiClient();
 	const internationalStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildInternationalStreetClient();
-
-	useEffect(() => {
-		setState(prevState => ({...prevState, client: autoCompleteClient}));
-	}, []);
-
-	const updateStateFromForm = (key, value) => {
-		setState(prevState => ({...prevState, [key]: value}));
-	};
-
+	
 	const updateField = (e) => {
-		updateStateFromForm(e.target.id, e.target.value);
-	};
-
-	const updateCheckbox = (e) => {
-		updateStateFromForm(e.target.id, e.target.checked);
+		const key = e.target.id;
+		const value = e.target.value;
+		setFormValues(prevState => ({...prevState, [key]: value}));
 	};
 
 	const formatAutocompleteSuggestion = (suggestion) => {
@@ -74,41 +62,37 @@ const Autocomplete = () => {
 	};
 	
 	const queryAutocompleteForSuggestions = (query, addressId, hasSecondaries = false) => {
-		const isUS = state.country === "US";
+		const isUS = formValues.country === "US";
 		
 		const client = isUS ? autoCompleteClient : internationalautocompleteClient;
 		const lookup = isUS
 			? createUSLookup(query, hasSecondaries)
 			: createInternationalLookup(query, addressId, hasSecondaries);
 	
-		lookup.country = state.country;
+		lookup.country = formValues.country;
 	
 		client.send(lookup)
 			.then(results => {
-				setState(prevState => ({ ...prevState, suggestions: results }));
+				setSuggestions(results);
 			})
 			.catch(console.warn);
 	};
 
 	const useAutoCompleteSuggestion = (suggestion) => {
-		if (state.country === "US") {
+		if (formValues.country === "US") {
 			return new Promise(resolve => {
-				setState(prevState => ({
+				setFormValues(prevState => ({
 					...prevState,
 					address1: suggestion.streetLine,
 					address2: suggestion.secondary,
 					city: suggestion.city,
 					state: suggestion.state,
 					zipCode: suggestion.zipcode,
-					suggestions: {result: []},
 				}), resolve);
 			});
 		} else {
 			return new Promise(resolve => {
-				setState(prevState => ({
-					...prevState,
-					freeform: suggestion.addressText,
-				}), resolve);
+				setFreeform(suggestion.addressText), resolve;
 			})
 		}
 	};
@@ -119,35 +103,35 @@ const Autocomplete = () => {
 		} else {
 			useAutoCompleteSuggestion(suggestion)
 				.then(() => {
-					if (state.shouldValidate) validateAddress();
+					if (shouldValidate) validateAddress();
 				});
 		}
 	};
 
 	const validateAddress = () => {
-		if (state.country === "US") {
+		if (formValues.country === "US") {
 			const lookup = new SmartySDK.usStreet.Lookup();
-			lookup.street = state.address1;
-			lookup.street2 = state.address2;
-			lookup.city = state.city;
-			lookup.state = state.state;
-			lookup.zipCode = state.zipCode;
+			lookup.street = formValues.address1;
+			lookup.street2 = formValues.address2;
+			lookup.city = formValues.city;
+			lookup.state = formValues.state;
+			lookup.zipCode = formValues.zipCode;
 
 			if (!!lookup.street) {
 				usStreetClient.send(lookup)
 					.then((response) => updateStateFromValidatedUsAddress(response, true))
-					.catch(e => setState(prevState => ({...prevState, error: e.error})));
+					.catch(e => setError(e.error));
 			} else {
-				setState(prevState => ({...prevState, error: "A street address is required."}));
+				setError("A street address is required.");
 			}
 		} else {
 			const lookup = new SmartySDK.internationalStreet.Lookup();
-			lookup.freeform = state.freeform;
-			lookup.country = state.country;
+			lookup.freeform = freeform;
+			lookup.country = formValues.country;
 
 			internationalStreetClient.send(lookup)
 				.then((response) => updateStateFromValidatedInternationalAddress(response, true))
-				.catch(e => setState(prevState => ({...prevState, error: e.error})));
+				.catch(e => setError(e.error));
 		}
 	};
 
@@ -156,34 +140,30 @@ const Autocomplete = () => {
 		const isValid = sdkUtils.isValid(lookup);
 		const isAmbiguous = sdkUtils.isAmbiguous(lookup);
 		const isMissingSecondary = sdkUtils.isMissingSecondary(lookup);
-		const newState = {
-			error: "",
-		};
+
+		const newFormValues = {};
 
 		if (!isValid) {
-			newState.error = "The address is invalid.";
+			setError("The address is invalid.");
 		} else if (isAmbiguous) {
-			newState.error = "The address is ambiguous.";
+			setError("The address is ambiguous.");
 		} else if (isMissingSecondary && !isAutocomplete) {
-			newState.error = "The address is missing a secondary number.";
+			setError("The address is missing a secondary number.");
 		} else if (isValid) {
 			const candidate = lookup.result[0];
 
-			newState.address1 = candidate.deliveryLine1;
-			newState.address2 = candidate.deliveryLine2 || "";
-			newState.city = candidate.components.cityName;
-			newState.state = candidate.components.state;
-			newState.zipCode = `${candidate.components.zipCode}-${candidate.components.plus4Code}`;
-			newState.error = "";
+			newFormValues.address1 = candidate.deliveryLine1;
+			newFormValues.address2 = candidate.deliveryLine2 || "";
+			newFormValues.city = candidate.components.cityName;
+			newFormValues.state = candidate.components.state;
+			newFormValues.zipCode = `${candidate.components.zipCode}-${candidate.components.plus4Code}`;
+			setFormValues(prevState => ({...prevState, ...newFormValues}));
 		}
-
-		setState(prevState => ({...prevState, ...newState}));
 	};
 
 	const updateStateFromValidatedInternationalAddress = (response, isAutocomplete = false) => {
 		const result = response.result[0];
-		const newState = {
-			error: "",
+		const newFormValues = {
 			address1: result.address1,
 			address2: result.address2,
 			city: result.components.locality,
@@ -191,7 +171,8 @@ const Autocomplete = () => {
 			zipCode: result.components.postalCode,
 		};
 
-		setState(prevState => ({...prevState, ...newState}));
+		setFormValues(prevState => ({...prevState, ...newFormValues}));
+		setError("");
 	};
 
 	return (
@@ -199,20 +180,21 @@ const Autocomplete = () => {
 			<div>
 				<InputForm
 					updateField={updateField}
-					updateCheckbox={updateCheckbox}
 					queryAutocompleteForSuggestions={queryAutocompleteForSuggestions}
-					state={state}
+					formValues={formValues}
+					shouldValidate={shouldValidate}
+					setShouldValidate={setShouldValidate}
 					validateCallback={validateAddress}
 				/>
 				<Suggestions
-					suggestions={state.suggestions}
+					suggestions={suggestions}
 					selectSuggestion={selectSuggestion}
 				/>
 			</div>
-			{state.error &&
+			{error &&
 				<div>
 					<h3>Validation Error:</h3>
-					{state.error}
+					{error}
 				</div>
 			}
 		</div>

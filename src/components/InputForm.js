@@ -3,7 +3,14 @@ import "./InputForm.scss";
 import inputFields from "../data/input_fields";
 import {countries} from "../data/countries";
 
-const InputForm = ({state, updateField, updateCheckbox, queryAutocompleteForSuggestions, validateCallback}) => {
+const InputForm = ({
+	updateField,
+	queryAutocompleteForSuggestions,
+	formValues,
+	shouldValidate,
+	setShouldValidate,
+	validateCallback
+}) => {
 	return (
 		<form className="autocomplete--input-form">
 			<div className="autocomplete--input-group">
@@ -17,8 +24,8 @@ const InputForm = ({state, updateField, updateCheckbox, queryAutocompleteForSugg
 					className="autocomplete--input-field"
 					id="shouldValidate"
 					type="checkbox"
-					checked={state.shouldValidate}
-					onChange={updateCheckbox}
+					checked={shouldValidate}
+					onChange={() => setShouldValidate(!shouldValidate)}
 				/>
 			</div>
 			{inputFields.map(inputField => (
@@ -33,7 +40,7 @@ const InputForm = ({state, updateField, updateCheckbox, queryAutocompleteForSugg
 						className="autocomplete--input-field"
 						type="text"
 						id={inputField.fieldName}
-						value={state[inputField.fieldName]}
+						value={formValues[inputField.fieldName]}
 						onChange={e => {
 							updateField(e);
 
@@ -52,7 +59,7 @@ const InputForm = ({state, updateField, updateCheckbox, queryAutocompleteForSugg
 					Country
 				</label>
 				<select
-					value={state.country}
+					value={formValues.country}
 					onChange={updateField}
 					id="country"
 					className="autocomplete--input-field"
