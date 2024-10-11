@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import * as SmartySDK from "smartystreets-javascript-sdk";
 import * as sdkUtils from "smartystreets-javascript-sdk-utils";
 import InputForm from "./InputForm";
@@ -75,6 +75,13 @@ const Autocomplete = () => {
 	};
 
 	const getFormValues = (address) => {
+		if (address.addressText) {
+			return {
+				...formValues,
+				freeform: address.addressText,
+			}
+		}
+
 		return {
 			...formValues,
 			address1: address.streetLine,
@@ -116,10 +123,8 @@ const Autocomplete = () => {
 			lookup.zipCode = addressToValidate.zipCode;
 
 			if (!!lookup.street) {
-				console.log("lookup", lookup);
 				usStreetClient.send(lookup)
 					.then((response) => {
-						console.log("response!!", response);
 						updateStateFromValidatedUsAddress(response, true)
 					})
 					.catch(e => setError(e.error));
@@ -128,8 +133,8 @@ const Autocomplete = () => {
 			}
 		} else {
 			const lookup = new SmartySDK.internationalStreet.Lookup();
-			lookup.freeform = freeform;
-			lookup.country = formValues.country;
+			lookup.freeform = addressToValidate.freeform || formatAutocompleteSuggestion(addressToValidate);
+			lookup.country = addressToValidate.country;
 
 			internationalStreetClient.send(lookup)
 				.then((response) => updateStateFromValidatedInternationalAddress(response, true))
@@ -163,7 +168,7 @@ const Autocomplete = () => {
 		}
 	};
 
-	const updateStateFromValidatedInternationalAddress = (response, isAutocomplete = false) => {
+	const updateStateFromValidatedInternationalAddress = (response) => {
 		const result = response.result[0];
 		const newFormValues = {
 			address1: result.address1,
@@ -174,7 +179,6 @@ const Autocomplete = () => {
 		};
 
 		setFormValues(prevState => ({...prevState, ...newFormValues}));
-		setError("");
 	};
 
 	return (
