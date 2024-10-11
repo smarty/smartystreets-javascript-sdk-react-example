@@ -77,7 +77,7 @@ const InputForm = ({
 			</div>
 			<button onClick={e => {
 				e.preventDefault();
-				validateCallback();
+				validateCallback(formValues);
 			}}>Validate</button>
 		</form>
 	);

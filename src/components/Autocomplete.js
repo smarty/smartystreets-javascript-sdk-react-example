@@ -74,41 +74,46 @@ const Autocomplete = () => {
 			.catch(console.warn);
 	};
 
+	const getFormValues = (address) => {
+		return {
+			...formValues,
+			address1: address.streetLine,
+			address2: address.secondary,
+			city: address.city,
+			state: address.state,
+			zipCode: address.zipcode,
+		}
+	}
+
 	const useAutoCompleteSuggestion = (suggestion) => {
 		if (formValues.country === "US") {
-			setFormValues(prevState => ({
-				...prevState,
-				address1: suggestion.streetLine,
-				address2: suggestion.secondary,
-				city: suggestion.city,
-				state: suggestion.state,
-				zipCode: suggestion.zipcode,
-			}))
+			setFormValues(getFormValues(suggestion));
 		} else {
-			console.log("freeform intl", suggestion);
 			setFreeform(suggestion.addressText);
 		}
 	};
 
 	const selectSuggestion = (suggestion) => {
 		if (suggestion.entries > 1) {
-			// Get secondaries
 			queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
 		} else {
 			useAutoCompleteSuggestion(suggestion)
 			
-			if (shouldValidate) validateAddress();
+			if (shouldValidate) {
+				validateAddress(getFormValues(suggestion));
+			}
 		}
 	};
 
-	const validateAddress = () => {
-		if (formValues.country === "US") {
+	const validateAddress = (addressToValidate) => {
+		console.log("validateAddress here", addressToValidate);
+		if (addressToValidate.country === "US") {
 			const lookup = new SmartySDK.usStreet.Lookup();
-			lookup.street = formValues.address1;
-			lookup.street2 = formValues.address2;
-			lookup.city = formValues.city;
-			lookup.state = formValues.state;
-			lookup.zipCode = formValues.zipCode;
+			lookup.street = addressToValidate.address1;
+			lookup.street2 = addressToValidate.address2;
+			lookup.city = addressToValidate.city;
+			lookup.state = addressToValidate.state;
+			lookup.zipCode = addressToValidate.zipCode;
 
 			if (!!lookup.street) {
 				console.log("lookup", lookup);
