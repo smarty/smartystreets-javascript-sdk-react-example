@@ -13,7 +13,6 @@ const Autocomplete = () => {
 		zipCode: "",
 		country: "US",
 	});
-	const [freeform, setFreeform] = useState("");
 	const [suggestions, setSuggestions] = useState({result: []});
 	const [shouldValidate, setShouldValidate] = useState(true);
 	const [error, setError] = useState("");
@@ -95,8 +94,6 @@ const Autocomplete = () => {
 	const useAutoCompleteSuggestion = (suggestion) => {
 		if (formValues.country === "US") {
 			setFormValues(getFormValues(suggestion));
-		} else {
-			setFreeform(suggestion.addressText);
 		}
 	};
 
