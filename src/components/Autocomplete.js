@@ -27,12 +27,6 @@ const Autocomplete = () => {
 	const usStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildUsStreetApiClient();
 	const internationalStreetClient = new SmartyCore.ClientBuilder(smartySharedCredentials).buildInternationalStreetClient();
 	
-	const updateField = (e) => {
-		const key = e.target.id;
-		const value = e.target.value;
-		setFormValues(prevState => ({...prevState, [key]: value}));
-	};
-
 	const formatAutocompleteSuggestion = (suggestion) => {
 		const addressText = suggestion.addressText ? `${suggestion.addressText} ` : "";
 		const street = suggestion.streetLine ? `${suggestion.streetLine} ` : "";
@@ -45,6 +39,7 @@ const Autocomplete = () => {
 		return addressText + street + secondary + entries + city + state + zip;
 	};
 
+	// Helper
 	const createUSLookup = (query, hasSecondaries) => {
 		const lookup = new SmartySDK.usAutocompletePro.Lookup(query);
 		if (hasSecondaries) {
@@ -53,6 +48,7 @@ const Autocomplete = () => {
 		return lookup;
 	};
 	
+	// Helper
 	const createInternationalLookup = (query, addressId, hasSecondaries) => {
 		const lookup = new SmartySDK.internationalAddressAutocomplete.Lookup(hasSecondaries ? { addressId } : query);
 		if (!hasSecondaries) {
@@ -80,31 +76,28 @@ const Autocomplete = () => {
 
 	const useAutoCompleteSuggestion = (suggestion) => {
 		if (formValues.country === "US") {
-			return new Promise(resolve => {
-				setFormValues(prevState => ({
-					...prevState,
-					address1: suggestion.streetLine,
-					address2: suggestion.secondary,
-					city: suggestion.city,
-					state: suggestion.state,
-					zipCode: suggestion.zipcode,
-				}), resolve);
-			});
+			setFormValues(prevState => ({
+				...prevState,
+				address1: suggestion.streetLine,
+				address2: suggestion.secondary,
+				city: suggestion.city,
+				state: suggestion.state,
+				zipCode: suggestion.zipcode,
+			}))
 		} else {
-			return new Promise(resolve => {
-				setFreeform(suggestion.addressText), resolve;
-			})
+			console.log("freeform intl", suggestion);
+			setFreeform(suggestion.addressText);
 		}
 	};
 
 	const selectSuggestion = (suggestion) => {
 		if (suggestion.entries > 1) {
+			// Get secondaries
 			queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
 		} else {
 			useAutoCompleteSuggestion(suggestion)
-				.then(() => {
-					if (shouldValidate) validateAddress();
-				});
+			
+			if (shouldValidate) validateAddress();
 		}
 	};
 
@@ -118,8 +111,12 @@ const Autocomplete = () => {
 			lookup.zipCode = formValues.zipCode;
 
 			if (!!lookup.street) {
+				console.log("lookup", lookup);
 				usStreetClient.send(lookup)
-					.then((response) => updateStateFromValidatedUsAddress(response, true))
+					.then((response) => {
+						console.log("response!!", response);
+						updateStateFromValidatedUsAddress(response, true)
+					})
 					.catch(e => setError(e.error));
 			} else {
 				setError("A street address is required.");
@@ -179,9 +176,9 @@ const Autocomplete = () => {
 		<div>
 			<div>
 				<InputForm
-					updateField={updateField}
 					queryAutocompleteForSuggestions={queryAutocompleteForSuggestions}
 					formValues={formValues}
+					setFormValues={setFormValues}
 					shouldValidate={shouldValidate}
 					setShouldValidate={setShouldValidate}
 					validateCallback={validateAddress}

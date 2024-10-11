@@ -4,13 +4,19 @@ import inputFields from "../data/input_fields";
 import {countries} from "../data/countries";
 
 const InputForm = ({
-	updateField,
 	queryAutocompleteForSuggestions,
 	formValues,
+	setFormValues,
 	shouldValidate,
 	setShouldValidate,
 	validateCallback
 }) => {
+	const updateField = (e) => {
+		const key = e.target.id;
+		const value = e.target.value;
+		setFormValues(prevState => ({...prevState, [key]: value}));
+	};
+	
 	return (
 		<form className="autocomplete--input-form">
 			<div className="autocomplete--input-group">
