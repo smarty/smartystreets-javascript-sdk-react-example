@@ -78,6 +78,7 @@ const Autocomplete = () => {
 			return {
 				...formValues,
 				freeform: address.addressText,
+				address1: address.addressText,
 			}
 		}
 
@@ -91,17 +92,11 @@ const Autocomplete = () => {
 		}
 	}
 
-	const useAutoCompleteSuggestion = (suggestion) => {
-		if (formValues.country === "US") {
-			setFormValues(getFormValues(suggestion));
-		}
-	};
-
 	const selectSuggestion = (suggestion) => {
 		if (suggestion.entries > 1) {
 			queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
 		} else {
-			useAutoCompleteSuggestion(suggestion)
+			setFormValues(getFormValues(suggestion));
 			
 			if (shouldValidate) {
 				validateAddress(getFormValues(suggestion));
