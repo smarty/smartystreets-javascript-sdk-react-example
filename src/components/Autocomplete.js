@@ -105,7 +105,7 @@ const Autocomplete = () => {
 	};
 
 	const validateAddress = (addressToValidate) => {
-		console.log("validateAddress here", addressToValidate);
+		setError("");
 		if (addressToValidate.country === "US") {
 			const lookup = new SmartySDK.usStreet.Lookup();
 			lookup.street = addressToValidate.address1;
@@ -163,11 +163,11 @@ const Autocomplete = () => {
 	const updateStateFromValidatedInternationalAddress = (response) => {
 		const result = response.result[0];
 		const newFormValues = {
-			address1: result.address1,
-			address2: result.address2,
-			city: result.components.locality,
-			state: result.components.administrativeArea,
-			zipCode: result.components.postalCode,
+			address1: result.address1 || "",
+			address2: result.address2 || "",
+			city: result.components.locality || "",
+			state: result.components.administrativeArea || "",
+			zipCode: result.components.postalCode || "",
 		};
 
 		setFormValues(prevState => ({...prevState, ...newFormValues}));
