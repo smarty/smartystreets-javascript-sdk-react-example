@@ -54,7 +54,7 @@ const Autocomplete = () => {
 		return lookup;
 	};
 	
-	const queryAutocompleteForSuggestions = (query, addressId, hasSecondaries = false) => {
+	const queryAutocompleteForSuggestions = async (query, addressId, hasSecondaries = false) => {
 		const isUS = formValues.country === "US";
 		
 		const client = isUS ? autoCompleteClient : internationalautocompleteClient;
@@ -64,63 +64,59 @@ const Autocomplete = () => {
 	
 		lookup.country = formValues.country;
 	
-		client.send(lookup)
-			.then(results => {
-				setSuggestions(results);
-			})
-			.catch(console.warn);
+		try {
+			const results = await client.send(lookup);
+			setSuggestions(results);
+		} catch (error) {
+			console.warn(error);
+		}
 	};
 
-	const getFormValues = (address) => {
-		return new Promise((resolve) => {
-		  if (address.addressText) {
+	const getFormValues = async (address) => {
+		if (address.addressText) {
 			const lookup = createInternationalLookup(address.addressText, address.addressId, true);
 			lookup.country = formValues.country;
-			internationalautocompleteClient.send(lookup)
-			  .then(results => {
+			try {
+				const results = await internationalautocompleteClient.send(lookup);
 				const result = results.result[0];
-				console.log("autocomplete result", result);
-				resolve({
-				  ...formValues,
-				  address1: result.street || "",
-				  address2: result.secondary || "",
-				  city: result.locality || "",
-				  state: result.administrativeArea || "",
-				  zipCode: result.postalCode || "",
-				});
-			  })
-			  .catch(error => {
+				return {
+					...formValues,
+					address1: result.street || "",
+					address2: result.secondary || "",
+					city: result.locality || "",
+					state: result.administrativeArea || "",
+					zipCode: result.postalCode || "",
+				};
+			} catch (error) {
 				console.warn(error);
-				resolve(formValues); // Resolve with current formValues in case of error
-			  });
-		  } else {
-			resolve({
-			  ...formValues,
-			  address1: address.streetLine || "",
-			  address2: address.secondary || "",
-			  city: address.city || "",
-			  state: address.state || "",
-			  zipCode: address.zipcode || "",
-			});
-		  }
-		});
-	  }
-	  
-	  const selectSuggestion = (suggestion) => {
-		if (suggestion.entries > 1) {
-		  queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
+				return formValues; // Return current formValues in case of error
+			}
 		} else {
-		  getFormValues(suggestion).then(newFormValues => {
+			return {
+				...formValues,
+				address1: address.streetLine || "",
+				address2: address.secondary || "",
+				city: address.city || "",
+				state: address.state || "",
+				zipCode: address.zipcode || "",
+			};
+		}
+	};
+	  
+	const selectSuggestion = async (suggestion) => {
+		if (suggestion.entries > 1) {
+			await queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
+		} else {
+			const newFormValues = await getFormValues(suggestion);
 			setFormValues(newFormValues);
 			
 			if (shouldValidate) {
-			  validateAddress(newFormValues);
+				await validateAddress(newFormValues);
 			}
-		  });
 		}
-	  };
+	};
 
-	const validateAddress = (addressToValidate) => {
+	const validateAddress = async (addressToValidate) => {
 		setError("");
 		if (addressToValidate.country === "US") {
 			const lookup = new SmartySDK.usStreet.Lookup();
@@ -131,11 +127,12 @@ const Autocomplete = () => {
 			lookup.zipCode = addressToValidate.zipCode;
 
 			if (!!lookup.street) {
-				usStreetClient.send(lookup)
-					.then((response) => {
-						updateStateFromValidatedUsAddress(response, true)
-					})
-					.catch(e => setError(e.error));
+				try {
+					const response = await usStreetClient.send(lookup);
+					updateStateFromValidatedUsAddress(response, true);
+				} catch (e) {
+					setError(e.error);
+				}
 			} else {
 				setError("A street address is required.");
 			}
@@ -144,9 +141,12 @@ const Autocomplete = () => {
 			lookup.freeform = addressToValidate.freeform || formatAutocompleteSuggestion(addressToValidate);
 			lookup.country = addressToValidate.country;
 
-			internationalStreetClient.send(lookup)
-				.then((response) => updateStateFromValidatedInternationalAddress(response, true))
-				.catch(e => setError(e.error));
+			try {
+				const response = await internationalStreetClient.send(lookup);
+				updateStateFromValidatedInternationalAddress(response, true);
+			} catch (e) {
+				setError(e.error);
+			}
 		}
 	};
 
@@ -178,7 +178,6 @@ const Autocomplete = () => {
 
 	const updateStateFromValidatedInternationalAddress = (response) => {
 		const result = response.result[0].components;
-		console.log("validation result", result);
 		const newFormValues = {
 			address1: result.address1 || formValues.address1,
 			address2: result.address2 || formValues.address2,
