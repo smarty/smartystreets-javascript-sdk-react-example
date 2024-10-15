@@ -38,7 +38,6 @@ const Autocomplete = () => {
 		return addressText + street + secondary + entries + city + state + zip;
 	};
 
-	// Helper
 	const createUSLookup = (query, hasSecondaries) => {
 		const lookup = new SmartySDK.usAutocompletePro.Lookup(query);
 		if (hasSecondaries) {
@@ -47,7 +46,6 @@ const Autocomplete = () => {
 		return lookup;
 	};
 	
-	// Helper
 	const createInternationalLookup = (query, addressId, hasSecondaries) => {
 		const lookup = new SmartySDK.internationalAddressAutocomplete.Lookup(hasSecondaries ? { addressId } : query);
 		if (!hasSecondaries) {
@@ -74,35 +72,53 @@ const Autocomplete = () => {
 	};
 
 	const getFormValues = (address) => {
-		if (address.addressText) {
-			return {
-				...formValues,
-				freeform: address.addressText,
-				address1: address.addressText,
-			}
-		}
-
-		return {
-			...formValues,
-			address1: address.streetLine,
-			address2: address.secondary,
-			city: address.city,
-			state: address.state,
-			zipCode: address.zipcode,
-		}
-	}
-
-	const selectSuggestion = (suggestion) => {
+		return new Promise((resolve) => {
+		  if (address.addressText) {
+			const lookup = createInternationalLookup(address.addressText, address.addressId, true);
+			lookup.country = formValues.country;
+			internationalautocompleteClient.send(lookup)
+			  .then(results => {
+				const result = results.result[0];
+				console.log("autocomplete result", result);
+				resolve({
+				  ...formValues,
+				  address1: result.street || "",
+				  address2: result.secondary || "",
+				  city: result.locality || "",
+				  state: result.administrativeArea || "",
+				  zipCode: result.postalCode || "",
+				});
+			  })
+			  .catch(error => {
+				console.warn(error);
+				resolve(formValues); // Resolve with current formValues in case of error
+			  });
+		  } else {
+			resolve({
+			  ...formValues,
+			  address1: address.streetLine || "",
+			  address2: address.secondary || "",
+			  city: address.city || "",
+			  state: address.state || "",
+			  zipCode: address.zipcode || "",
+			});
+		  }
+		});
+	  }
+	  
+	  const selectSuggestion = (suggestion) => {
 		if (suggestion.entries > 1) {
-			queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
+		  queryAutocompleteForSuggestions(formatAutocompleteSuggestion(suggestion), suggestion.addressId, true);
 		} else {
-			setFormValues(getFormValues(suggestion));
+		  getFormValues(suggestion).then(newFormValues => {
+			setFormValues(newFormValues);
 			
 			if (shouldValidate) {
-				validateAddress(getFormValues(suggestion));
+			  validateAddress(newFormValues);
 			}
+		  });
 		}
-	};
+	  };
 
 	const validateAddress = (addressToValidate) => {
 		setError("");
@@ -161,13 +177,14 @@ const Autocomplete = () => {
 	};
 
 	const updateStateFromValidatedInternationalAddress = (response) => {
-		const result = response.result[0];
+		const result = response.result[0].components;
+		console.log("validation result", result);
 		const newFormValues = {
-			address1: result.address1 || "",
-			address2: result.address2 || "",
-			city: result.components.locality || "",
-			state: result.components.administrativeArea || "",
-			zipCode: result.components.postalCode || "",
+			address1: result.address1 || formValues.address1,
+			address2: result.address2 || formValues.address2,
+			city: result.locality || formValues.city,
+			state: result.administrativeArea || formValues.state,
+			zipCode: result.postalCode || formValues.zipCode,
 		};
 
 		setFormValues(prevState => ({...prevState, ...newFormValues}));
