@@ -3,71 +3,84 @@ import "./InputForm.scss";
 import inputFields from "../data/input_fields";
 import {countries} from "../data/countries";
 
-export default function InputForm({state, updateField, updateCheckbox, queryAutocompleteForSuggestions, validateCallback}) {
+const InputForm = ({
+	queryAutocompleteForSuggestions,
+	formValues,
+	setFormValues,
+	shouldValidate,
+	setShouldValidate,
+	validateCallback
+}) => {
+	const updateField = (e) => {
+		const key = e.target.id;
+		const value = e.target.value;
+		setFormValues(prevState => ({...prevState, [key]: value}));
+	};
+	
 	return (
-		<form className={"autocomplete--input-form"}>
+		<form className="autocomplete--input-form">
 			<div className="autocomplete--input-group">
 				<label
 					htmlFor="shouldValidate"
-					className={"autocomplete--input-label"}
+					className="autocomplete--input-label"
 				>
 					Validate on Selection
 				</label>
 				<input
-					className={"autocomplete--input-field"}
-					id={"shouldValidate"}
+					className="autocomplete--input-field"
+					id="shouldValidate"
 					type="checkbox"
-					checked={state.shouldValidate}
-					onChange={updateCheckbox}
+					checked={shouldValidate}
+					onChange={() => setShouldValidate(!shouldValidate)}
 				/>
 			</div>
-			{inputFields.map(inputField => {
-				return (
-					<div className={"autocomplete--input-group"} key={inputField.fieldName}>
-						<label
-							className={"autocomplete--input-label"}
-							htmlFor={inputField.fieldName}
-						>
-							{inputField.fieldLabel}
-						</label>
-						<input
-							className={"autocomplete--input-field"}
-							type="text"
-							id={inputField.fieldName}
-							value={state[inputField.fieldName]}
-							onChange={e => {
-								updateField(e);
+			{inputFields.map(inputField => (
+				<div className="autocomplete--input-group" key={inputField.fieldName}>
+					<label
+						className="autocomplete--input-label"
+						htmlFor={inputField.fieldName}
+					>
+						{inputField.fieldLabel}
+					</label>
+					<input
+						className="autocomplete--input-field"
+						type="text"
+						id={inputField.fieldName}
+						value={formValues[inputField.fieldName]}
+						onChange={e => {
+							updateField(e);
 
-								if (inputField.fieldName === "address1") {
-									queryAutocompleteForSuggestions(e.target.value);
-								}
-							}}
-						/>
-					</div>
-				);
-			})}
-			<div className={"autocomplete--input-group"}>
+							if (inputField.fieldName === "address1") {
+								queryAutocompleteForSuggestions(e.target.value);
+							}
+						}}
+					/>
+				</div>
+			))}
+			<div className="autocomplete--input-group">
 				<label
-					className={"autocomplete--input-label"}
+					className="autocomplete--input-label"
 					htmlFor="country"
 				>
 					Country
 				</label>
 				<select
-					value={state.country}
+					value={formValues.country}
 					onChange={updateField}
-					id={"country"}
-					className={"autocomplete--input-field"}
+					id="country"
+					className="autocomplete--input-field"
 				>
-					{countries.map(country => {
-						return <option value={country.iso2} key={country.iso2}>{country.name}</option>;
-					})}
+					{countries.map(country => (
+						<option value={country.iso2} key={country.iso2}>{country.name}</option>
+					))}
 				</select>
 			</div>
 			<button onClick={e => {
 				e.preventDefault();
-				validateCallback();
+				validateCallback(formValues);
 			}}>Validate</button>
 		</form>
 	);
-}
+};
+
+export default InputForm;
