@@ -23,7 +23,7 @@
     "prop-types": "^15.8.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "smartystreets-javascript-sdk": "^5.1.4",
+    "smartystreets-javascript-sdk": "^7.0.1",
     "smartystreets-javascript-sdk-utils": "^1.2.7"
   }
 }
