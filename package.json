@@ -2,7 +2,6 @@
   "name": "smartystreets-javascript-sdk-react-example",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "parcel public/index.html --open"
@@ -11,19 +10,19 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.18.6",
-    "@parcel/transformer-sass": "^2.10.3",
+    "@babel/core": "^7.28.5",
+    "@parcel/transformer-sass": "^2.16.0",
     "buffer": "^6.0.3",
-    "fsevents": "^2.1.3",
+    "fsevents": "^2.3.3",
     "process": "^0.11.10",
-    "sass": "^1.69.5"
+    "sass": "^1.93.2"
   },
   "dependencies": {
-    "parcel": "^2.10.3",
+    "parcel": "^2.16.0",
     "prop-types": "^15.8.1",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
-    "smartystreets-javascript-sdk": "^7.0.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "smartystreets-javascript-sdk": "^7.1.0",
     "smartystreets-javascript-sdk-utils": "^1.2.7"
   }
 }
