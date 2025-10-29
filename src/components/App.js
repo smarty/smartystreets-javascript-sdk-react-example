@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import Autocomplete from "./Autocomplete";
 
 import "./App.scss";
@@ -8,4 +8,6 @@ const App = () => {
 	return <Autocomplete/>;
 };
 
-ReactDOM.render(<App/>, document.getElementById("app"));
+const container = document.getElementById("app");
+const root = createRoot(container);
+root.render(<App />);
