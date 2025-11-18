@@ -11,18 +11,18 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.28.5",
-    "@parcel/transformer-sass": "^2.16.0",
+    "@parcel/transformer-sass": "^2.16.1",
     "buffer": "^6.0.3",
     "fsevents": "^2.3.3",
     "process": "^0.11.10",
-    "sass": "^1.93.2"
+    "sass": "^1.94.1"
   },
   "dependencies": {
-    "parcel": "^2.16.0",
+    "parcel": "^2.16.1",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "smartystreets-javascript-sdk": "^7.1.0",
-    "smartystreets-javascript-sdk-utils": "^1.2.7"
+    "smartystreets-javascript-sdk": "^7.3.0",
+    "smartystreets-javascript-sdk-utils": "^1.2.8"
   }
 }
